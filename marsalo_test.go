@@ -1,9 +1,15 @@
 package marsalo
 
 import (
+  "net/http"
   "io/ioutil"
   "bytes"
   "testing"
+)
+
+const (
+  JSON_CONTENT = `{"name": "Bob", "age": 50, "hometown": "testingTown"}`
+  XML_CONTENT = `<dummy><name>Bob</name> <age>50</age> <hometown>testingTown</hometown></dummy>`
 )
 
 /*
@@ -21,8 +27,7 @@ type Dummy struct {
 */
 func TestJSONParse(test *testing.T) {
 
-  content := `{"name": "Bob", "age": 50, "hometown": "testingTown"}`
-  runParser(parseJSON, content, test)
+  runParser(parseJSON, JSON_CONTENT, test)
 }
 
 /*
@@ -30,8 +35,7 @@ func TestJSONParse(test *testing.T) {
 */
 func TestXMLParse(test *testing.T) {
 
-  content := `<dummy><name>Bob</name> <age>50</age> <hometown>testingTown</hometown></dummy>`
-  runParser(parseXML, content, test)
+  runParser(parseXML, XML_CONTENT, test)
 }
 
 /*
@@ -39,6 +43,21 @@ func TestXMLParse(test *testing.T) {
 */
 func TestResponseParse(test *testing.T) {
 
+  var response *http.Response
+  var dummy Dummy
+  var err error
+
+  response = new(http.Response)
+  response.Header = make(http.Header)
+  response.Header.Set("Content-Type", "application/json")
+  response.Body = ioutil.NopCloser(bytes.NewReader([]byte(JSON_CONTENT)))
+
+  err = UnmarshalBody(response, &dummy)
+  if(err != nil) {
+    test.Logf("Failed to parse response body: %v\n", err)
+    test.Fail()
+    return
+  }
 }
 
 /*

@@ -11,7 +11,6 @@ import (
 )
 
 type bodyParser func(io.ReadCloser, interface{})(error)
-
 var parsers map[string]bodyParser
 
 func init() {
