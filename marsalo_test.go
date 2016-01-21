@@ -11,9 +11,9 @@ import (
 */
 type Dummy struct {
 
-  name string `json:"name"; xml:"name";`
-  age int `json:"age"; xml:"name";`
-  hometown string `json:"hometown"; xml:"hometown";`
+  Name string `json:"name" xml:"name"`
+  Age int `json:"age" xml:"age"`
+  Hometown string `json:"hometown" xml:"hometown"`
 }
 
 /*
@@ -30,7 +30,7 @@ func TestJSONParse(test *testing.T) {
 */
 func TestXMLParse(test *testing.T) {
 
-  content := `<dummy> <name>Bob</name> <age>50</age> <hometown>testingTown</hometown> </dummy>`
+  content := `<dummy><name>Bob</name> <age>50</age> <hometown>testingTown</hometown></dummy>`
   runParser(parseXML, content, test)
 }
 
@@ -64,7 +64,7 @@ func runParser(parser bodyParser, content string, test *testing.T) {
   }
 
   // make sure the values are right
-  if(dummy.name != "Bob" || dummy.age != 50 || dummy.hometown != "testingTown") {
+  if(dummy.Name != "Bob" || dummy.Age != 50 || dummy.Hometown != "testingTown") {
     test.Logf("Parsing did not actually decode into the given struct: %v", &dummy)
     test.Fail()
     return
