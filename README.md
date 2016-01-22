@@ -1,5 +1,8 @@
 #marsalo
 
+[![Build Status](https://travis-ci.org/Knetic/marsalo.svg?branch=master)](https://travis-ci.org/Knetic/marsalo)
+[![Godoc](https://godoc.org/github.com/Knetic/marsalo?status.png)](https://godoc.org/github.com/Knetic/marsalo)
+
 Marsalo is a small library that makes one-liner unmarshalling of http responses easy. The library isn't complicated, it's just a convenience library for code that tends to get written over and over.
 
 Marsalo is Esperanto for "marshal".
