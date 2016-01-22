@@ -1,24 +1,24 @@
 package marsalo
 
 import (
-
-  "fmt"
-  "io"
-  "encoding/xml"
-  "encoding/json"
-  "net/http"
-  "errors"
+	"encoding/json"
+	"encoding/xml"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
 )
 
-type bodyParser func(io.ReadCloser, interface{})(error)
+type bodyParser func(io.ReadCloser, interface{}) error
+
 var parsers map[string]bodyParser
 
 func init() {
 
-  parsers = make(map[string]bodyParser)
-  parsers["application/json"] = parseJSON
-  parsers["text/json"] = parseJSON
-  parsers["text/xml"] = parseXML
+	parsers = make(map[string]bodyParser)
+	parsers["application/json"] = parseJSON
+	parsers["text/json"] = parseJSON
+	parsers["text/xml"] = parseXML
 }
 
 /*
@@ -27,22 +27,22 @@ func init() {
 */
 func UnmarshalBody(request *http.Response, target interface{}) error {
 
-  var contentType string
-  var parser bodyParser
-  var found bool
+	var contentType string
+	var parser bodyParser
+	var found bool
 
-  contentType = request.Header.Get("Content-Type")
-  if(contentType == "") {
-    return errors.New("Unable to unmarshal request - no 'Content-Type' header was specified")
-  }
+	contentType = request.Header.Get("Content-Type")
+	if contentType == "" {
+		return errors.New("Unable to unmarshal request - no 'Content-Type' header was specified")
+	}
 
-  parser, found = parsers[contentType]
-  if(!found) {
-    errorMsg := fmt.Sprintf("Unable to unmarshal request - no parser found for MIME type '%s'", contentType)
-    return errors.New(errorMsg)
-  }
+	parser, found = parsers[contentType]
+	if !found {
+		errorMsg := fmt.Sprintf("Unable to unmarshal request - no parser found for MIME type '%s'", contentType)
+		return errors.New(errorMsg)
+	}
 
-  return parser(request.Body, target)
+	return parser(request.Body, target)
 }
 
 /*
@@ -50,10 +50,10 @@ func UnmarshalBody(request *http.Response, target interface{}) error {
 */
 func parseJSON(stream io.ReadCloser, target interface{}) error {
 
-  var decoder *json.Decoder
+	var decoder *json.Decoder
 
-  decoder = json.NewDecoder(stream)
-  return decoder.Decode(target)
+	decoder = json.NewDecoder(stream)
+	return decoder.Decode(target)
 }
 
 /*
@@ -61,8 +61,8 @@ func parseJSON(stream io.ReadCloser, target interface{}) error {
 */
 func parseXML(stream io.ReadCloser, target interface{}) error {
 
-  var decoder *xml.Decoder
+	var decoder *xml.Decoder
 
-  decoder = xml.NewDecoder(stream)
-  return decoder.Decode(target)
+	decoder = xml.NewDecoder(stream)
+	return decoder.Decode(target)
 }
