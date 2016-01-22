@@ -27,22 +27,7 @@ func init() {
 */
 func UnmarshalRequest(request *http.Request, target interface{}) error {
 
-	var contentType string
-	var parser bodyParser
-	var found bool
-
-	contentType = request.Header.Get("Content-Type")
-	if contentType == "" {
-		return errors.New("Unable to unmarshal request - no 'Content-Type' header was specified")
-	}
-
-	parser, found = parsers[contentType]
-	if !found {
-		errorMsg := fmt.Sprintf("Unable to unmarshal request - no parser found for MIME type '%s'", contentType)
-		return errors.New(errorMsg)
-	}
-
-	return parser(request.Body, target)
+	return unmarshalStream(request.Body, request.Header.Get("Content-Type"), target)
 }
 
 /*
@@ -51,22 +36,25 @@ func UnmarshalRequest(request *http.Request, target interface{}) error {
 */
 func UnmarshalResponse(response *http.Response, target interface{}) error {
 
-	var contentType string
+	return unmarshalStream(response.Body, response.Header.Get("Content-Type"), target)
+}
+
+func unmarshalStream(readCloser io.ReadCloser, contentType string, target interface{}) error {
+
 	var parser bodyParser
 	var found bool
 
-	contentType = response.Header.Get("Content-Type")
 	if contentType == "" {
-		return errors.New("Unable to unmarshal request - no 'Content-Type' header was specified")
+		return errors.New("Unable to unmarshal - no 'Content-Type' header was specified")
 	}
 
 	parser, found = parsers[contentType]
 	if !found {
-		errorMsg := fmt.Sprintf("Unable to unmarshal request - no parser found for MIME type '%s'", contentType)
+		errorMsg := fmt.Sprintf("Unable to unmarshal - no parser found for MIME type '%s'", contentType)
 		return errors.New(errorMsg)
 	}
 
-	return parser(response.Body, target)
+	return parser(readCloser, target)
 }
 
 /*
