@@ -46,21 +46,21 @@ func TestResponseParse(test *testing.T) {
 
 	var err error
 
-	err = runUnmarshalParser("application/json", JSON_CONTENT, test)
+	err = runResponseUnmarshalParser("application/json", JSON_CONTENT, test)
 	if err != nil {
 		test.Logf("Failed to parse json body: %v\n", err)
 		test.Fail()
 		return
 	}
 
-	err = runUnmarshalParser("text/json", JSON_CONTENT, test)
+	err = runResponseUnmarshalParser("text/json", JSON_CONTENT, test)
 	if err != nil {
 		test.Logf("Failed to parse json body: %v\n", err)
 		test.Fail()
 		return
 	}
 
-	err = runUnmarshalParser("text/xml", XML_CONTENT, test)
+	err = runResponseUnmarshalParser("text/xml", XML_CONTENT, test)
 	if err != nil {
 		test.Logf("Failed to parse xml body: %v\n", err)
 		test.Fail()
@@ -73,13 +73,13 @@ func TestResponseParse(test *testing.T) {
 */
 func TestMismatchResponseParse(test *testing.T) {
 
-	if runUnmarshalParser("text/xml", JSON_CONTENT, test) == nil {
+	if runResponseUnmarshalParser("text/xml", JSON_CONTENT, test) == nil {
 		test.Logf("Failed to correctly refuse to parse json content given as xml")
 		test.Fail()
 		return
 	}
 
-	if runUnmarshalParser("application/json", XML_CONTENT, test) == nil {
+	if runResponseUnmarshalParser("application/json", XML_CONTENT, test) == nil {
 		test.Logf("Failed to correctly refuse to parse xml content given as json")
 		test.Fail()
 		return
@@ -108,7 +108,7 @@ func runParser(parser bodyParser, content string, test *testing.T) {
 	}
 }
 
-func runUnmarshalParser(contentType string, content string, test *testing.T) error {
+func runResponseUnmarshalParser(contentType string, content string, test *testing.T) error {
 
 	var response *http.Response
 	var dummy Dummy
@@ -119,7 +119,29 @@ func runUnmarshalParser(contentType string, content string, test *testing.T) err
 	response.Header.Set("Content-Type", contentType)
 	response.Body = ioutil.NopCloser(bytes.NewReader([]byte(content)))
 
-	err = UnmarshalBody(response, &dummy)
+	err = UnmarshalResponse(response, &dummy)
+	if err != nil {
+		return err
+	}
+
+	if !checkDummyValues(dummy) {
+		errorMsg := fmt.Sprintf("Parsing did not actually decode into the given struct: %v", dummy)
+		return errors.New(errorMsg)
+	}
+	return nil
+}
+
+func runRequestUnmarshalParser(contentType string, content string, test *testing.T) error {
+
+	var request *http.Request
+	var dummy Dummy
+	var err error
+
+	request, _ = http.NewRequest("POST", "http://example.com/marsalo", bytes.NewReader([]byte(content)))
+	request.Header = make(http.Header)
+	request.Header.Set("Content-Type", contentType)
+
+	err = UnmarshalRequest(request, &dummy)
 	if err != nil {
 		return err
 	}

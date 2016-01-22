@@ -25,7 +25,7 @@ func init() {
   Unmarshals the given [response] body from either XML or JSON, populating the given [target]
   with the results.
 */
-func UnmarshalBody(request *http.Response, target interface{}) error {
+func UnmarshalRequest(request *http.Request, target interface{}) error {
 
 	var contentType string
 	var parser bodyParser
@@ -43,6 +43,30 @@ func UnmarshalBody(request *http.Response, target interface{}) error {
 	}
 
 	return parser(request.Body, target)
+}
+
+/*
+  Unmarshals the given [response] body from either XML or JSON, populating the given [target]
+  with the results.
+*/
+func UnmarshalResponse(response *http.Response, target interface{}) error {
+
+	var contentType string
+	var parser bodyParser
+	var found bool
+
+	contentType = response.Header.Get("Content-Type")
+	if contentType == "" {
+		return errors.New("Unable to unmarshal request - no 'Content-Type' header was specified")
+	}
+
+	parser, found = parsers[contentType]
+	if !found {
+		errorMsg := fmt.Sprintf("Unable to unmarshal request - no parser found for MIME type '%s'", contentType)
+		return errors.New(errorMsg)
+	}
+
+	return parser(response.Body, target)
 }
 
 /*
