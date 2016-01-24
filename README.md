@@ -23,7 +23,7 @@ Assume you have the following object model (just as an example):
 
 And let's say you write a client to an HTTP API which may return either XML or JSON (or maybe you can pick, whatever), but the object represented by the response is the same.
 
-    func HandleResponse(response \*http.Response) {
+    func HandleResponse(response *http.Response) {
 
       var structuredResponse SomeObjectModel
 
@@ -38,7 +38,7 @@ And let's say you write a client to an HTTP API which may return either XML or J
 
 `marsalo` works similarly for writing a webserver which needs to unmarshal the request from a client:
 
-    func HandleRequest(request \*http.Request) {
+    func HandleRequest(request *http.Request) {
 
       var structuredResponse SomeObjectModel
 
